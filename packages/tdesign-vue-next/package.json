@@ -1,7 +1,7 @@
 {
-  "name": "tdesign-vue-next",
+  "name": "@hlcloud/ui",
   "version": "1.11.0",
-  "title": "tdesign-vue-next",
+  "title": "@hlcloud/ui",
   "description": "TDesign Component for vue-next",
   "keywords": [
     "vue",
@@ -36,7 +36,7 @@
     "esm/**/style/**"
   ],
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "http://192.168.30.140:4873/"
   },
   "repository": {
     "type": "git",
