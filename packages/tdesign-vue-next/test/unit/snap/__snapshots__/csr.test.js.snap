@@ -28056,13 +28056,7 @@ exports[`csr snapshot test > csr test ./packages/components/card/_example/hover.
     <div
       class="t-card__actions"
     >
-      
-      <a
-        href="javascript:void(0)"
-      >
-        操作
-      </a>
-      
+      操作
     </div>
     <!---->
   </div>
@@ -28103,13 +28097,7 @@ exports[`csr snapshot test > csr test ./packages/components/card/_example/small.
     <div
       class="t-card__actions"
     >
-      
-      <a
-        href="javascript:void(0)"
-      >
-        操作
-      </a>
-      
+      操作
     </div>
     <!---->
   </div>
@@ -92027,13 +92015,7 @@ exports[`csr snapshot test > csr test ./packages/components/menu/_example/multi-
             <span
               class="t-menu__content"
             >
-              
-              <span
-                data-v-56eaaeba=""
-              >
-                消息区
-              </span>
-              
+              消息区
             </span>
             <svg
               class="t-fake-arrow"

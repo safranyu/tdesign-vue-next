@@ -3,7 +3,6 @@ import { DialogCloseContext } from './type';
 import props from './props';
 import { useConfig, usePrefixClass } from '../hooks/useConfig';
 import { useSameTarget } from './hooks';
-import { useTNodeJSX, useContent } from '../hooks/tnode';
 import useDestroyOnClose from '../hooks/useDestroyOnClose';
 import { getScrollbarWidth } from '@tdesign/common-js/utils/getScrollbarWidth';
 import useTeleport from '../hooks/useTeleport';
@@ -90,8 +89,6 @@ export default defineComponent({
   setup(props, context) {
     const COMPONENT_NAME = usePrefixClass('dialog');
     const classPrefix = usePrefixClass();
-    const renderContent = useContent();
-    const renderTNodeJSX = useTNodeJSX();
     const dialogEle = ref<HTMLElement | null>(null);
     const dialogCardRef = ref<HTMLElement | null>(null);
     const { globalConfig } = useConfig('dialog');
@@ -280,21 +277,19 @@ export default defineComponent({
     // Vue在引入阶段对事件的处理还做了哪些初始化操作。Vue在实例上用一个_events属性存贮管理事件的派发和更新，
     // 暴露出$on, $once, $off, $emit方法给外部管理事件和派发执行事件
     // 所以通过判断_events某个事件下监听函数数组是否超过一个，可以判断出组件是否监听了当前事件
-    const hasEventOn = (name: string) => {
-      // _events 因没有被暴露在vue实例接口中，只能把这个规则注释掉
-      // eslint-disable-next-line dot-notation
-      // @ts-ignore
-      const eventFuncs = this['_events']?.[name];
-      return !!eventFuncs?.length;
-    };
+    // const hasEventOn = (name: string) => {
+    //   // _events 因没有被暴露在vue实例接口中，只能把这个规则注释掉
+    //   // eslint-disable-next-line dot-notation
+    //   // @ts-ignore
+    //   const eventFuncs = this['_events']?.[name];
+    //   return !!eventFuncs?.length;
+    // };
+
     const renderDialog = () => {
-      // header 值为 true 显示空白头部
-      const headerContent = renderTNodeJSX('header', <h5 class="title"></h5>) ?? false;
-      const bodyContent = renderContent('default', 'body');
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { body, header, dialogClassName, theme, onConfirm, onCancel, onCloseBtnClick, ...otherProps } = props;
+      const { theme, onConfirm, onCancel, onCloseBtnClick, ...otherProps } = props;
       return (
-        // /* 非模态形态下draggable为true才允许拖拽 */
+        /** 非模态形态下draggable为true才允许拖拽 */
         <div class={wrapClass.value}>
           <div
             class={positionClass.value}
@@ -314,9 +309,7 @@ export default defineComponent({
                 ref={dialogCardRef}
                 theme={theme}
                 {...otherProps}
-                header={headerContent}
-                body={bodyContent}
-                class={dialogClassName}
+                v-slots={context.slots}
                 onConfirm={confirmBtnAction}
                 onCancel={cancelBtnAction}
                 onCloseBtnClick={closeBtnAction}
@@ -345,58 +338,40 @@ export default defineComponent({
       destroySelf();
     });
 
-    return {
-      COMPONENT_NAME,
-      isModal,
-      isModeLess,
-      isFullScreen,
-      maskClass,
-      dialogClass,
-      dialogStyle,
-      dialogEle,
-      beforeEnter,
-      afterEnter,
-      beforeLeave,
-      afterLeave,
-      hasEventOn,
-      renderDialog,
-      teleportElement,
+    return () => {
+      const maskView = (isModal.value || isFullScreen.value) && <div key="mask" class={maskClass.value}></div>;
+      const dialogView = renderDialog();
+      const view = [maskView, dialogView];
+      const ctxStyle = { zIndex: props.zIndex };
+      // dialog__ctx--fixed 绝对定位
+      // dialog__ctx--absolute 挂载在attach元素上 相对定位
+      // __ctx--modeless modeless 点击穿透
+      const ctxClass = [
+        `${COMPONENT_NAME.value}__ctx`,
+        {
+          [`${COMPONENT_NAME.value}__ctx--fixed`]: isModal.value || isFullScreen.value,
+          [`${COMPONENT_NAME.value}__ctx--absolute`]: isModal.value && props.showInAttachedElement,
+          [`${COMPONENT_NAME.value}__ctx--modeless`]: isModeLess.value,
+        },
+      ];
+      return (
+        <Teleport disabled={!props.attach || !teleportElement.value} to={teleportElement.value}>
+          <Transition
+            duration={300}
+            name={`${COMPONENT_NAME.value}-zoom__vue`}
+            onBeforeEnter={beforeEnter}
+            onAfterEnter={afterEnter}
+            onBeforeLeave={beforeLeave}
+            onAfterLeave={afterLeave}
+          >
+            {(!props.destroyOnClose || props.visible) && (
+              <div v-show={props.visible} class={ctxClass} style={ctxStyle} {...context.attrs}>
+                {view}
+              </div>
+            )}
+          </Transition>
+        </Teleport>
+      );
     };
-  },
-  render() {
-    const { COMPONENT_NAME } = this;
-    const maskView = (this.isModal || this.isFullScreen) && <div key="mask" class={this.maskClass}></div>;
-    const dialogView = this.renderDialog();
-    const view = [maskView, dialogView];
-    const ctxStyle = { zIndex: this.zIndex };
-    // dialog__ctx--fixed 绝对定位
-    // dialog__ctx--absolute 挂载在attach元素上 相对定位
-    // __ctx--modeless modeless 点击穿透
-    const ctxClass = [
-      `${COMPONENT_NAME}__ctx`,
-      {
-        [`${COMPONENT_NAME}__ctx--fixed`]: this.isModal || this.isFullScreen,
-        [`${COMPONENT_NAME}__ctx--absolute`]: this.isModal && this.showInAttachedElement,
-        [`${COMPONENT_NAME}__ctx--modeless`]: this.isModeLess,
-      },
-    ];
-    return (
-      <Teleport disabled={!this.attach || !this.teleportElement} to={this.teleportElement}>
-        <Transition
-          duration={300}
-          name={`${COMPONENT_NAME}-zoom__vue`}
-          onBeforeEnter={this.beforeEnter}
-          onAfterEnter={this.afterEnter}
-          onBeforeLeave={this.beforeLeave}
-          onAfterLeave={this.afterLeave}
-        >
-          {(!this.destroyOnClose || this.visible) && (
-            <div v-show={this.visible} class={ctxClass} style={ctxStyle} {...this.$attrs}>
-              {view}
-            </div>
-          )}
-        </Transition>
-      </Teleport>
-    );
   },
 });
