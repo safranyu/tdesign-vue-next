@@ -62,7 +62,7 @@
     "mitt": "^3.0.1",
     "sortablejs": "^1.15.0",
     "tdesign-icons-vue-next": "^0.3.4",
-    "tdesign-vue-next": "workspace:^",
+    "@hlcloud/ui": "workspace:^",
     "tinycolor2": "^1.6.0",
     "validator": "^13.9.0"
   },
